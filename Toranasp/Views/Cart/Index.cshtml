@@ -1,0 +1,317 @@
+﻿@model IEnumerable<Toranasp.Models.CartModel>
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var toEmail = "";
+}
+<br />
+<br />
+<br />
+<br />
+<br />
+
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script type="text/javascript">
+$(function () {
+    $(document).on("click", ".removecart", function () {
+        var model = {};
+        model.Id = $(this).siblings(".productid").val();
+        var removeButton = $(this);
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("Remove", "Cart")',
+            data: JSON.stringify(model),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function () {
+                var currentCount = parseInt($('#CartCount').text());
+                var newCount = currentCount - 1;
+                $('#CartCount').text(newCount);
+                $("#product-" + model.Id).remove();
+                updateTotalPrice();
+            },
+            error: function () {
+                alert("Lỗi khi thêm vào giỏ hàng!");
+            }
+        });
+
+        return false;
+    });
+
+    $(document).on("click", "[id^='increaseBtn-']", function () {
+        var quantityInput = $(this).prev(".quantity-input");
+        var quantity = parseInt(quantityInput.val());
+        quantityInput.val(quantity + 1);
+        updateTotalPrice();
+    });
+
+    $(document).on("click", "[id^='decreaseBtn-']", function () {
+        var quantityInput = $(this).next(".quantity-input");
+        var quantity = parseInt(quantityInput.val());
+        if (quantity > 0) {
+            quantityInput.val(quantity - 1);
+            updateTotalPrice();
+        }
+    });
+
+
+    $(document).on("click", ".quantity-btn", function () {
+    var productId = $(this).attr("id").split("-")[1];
+    var quantityInput = $("#ipQuantity-" + productId);
+    var quantity = parseInt(quantityInput.val());
+
+    if ($(this).attr("id").startsWith("decreaseBtn") && quantity === 0) {
+        // Gọi action xóa sản phẩm trong giỏ hàng
+        var model = {};
+        model.Id = productId;
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("Remove", "Cart")',
+            data: JSON.stringify(model),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function () {
+                var currentCount = parseInt($('#CartCount').text());
+                var newCount = currentCount - 1;
+                $('#CartCount').text(newCount);
+                $("#product-" + model.Id).remove();
+                updateTotalPrice();
+            },
+            error: function () {
+                alert("Lỗi khi xóa sản phẩm khỏi giỏ hàng!");
+            }
+        });
+    } else {
+        // Tiếp tục cập nhật tổng giá trị
+        updateTotalPrice();
+    }
+});
+
+    function updateTotalPrice() {
+        var totalPrice = 0;
+        $(".table-shopping-cart tbody tr").each(function () {
+            var quantity = parseInt($(this).find(".quantity-input").val());
+            var price = parseFloat($(this).find(".price").text());
+            totalPrice += quantity * price;
+        });
+        $("#totalPrice").text(totalPrice.toFixed(2));
+    }
+
+    updateTotalPrice();
+});
+</script>
+
+
+
+<script>
+
+       function updateTotalPrice() {
+        var totalPrice = 0;
+        $(".table-shopping-cart tbody tr").each(function () {
+            var quantity = parseInt($(this).find(".quantity-input").val());
+            var price = parseFloat($(this).find(".price").text());
+            totalPrice += quantity * price;
+        });
+        $("#totalPrice").text(totalPrice.toFixed(2));
+
+        // Lưu tổng giá trị vào Session
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("SaveTotalPrice", "Cart")',
+            data: { totalPrice: totalPrice },
+            success: function () {
+                console.log("Tổng giá trị đã được lưu vào Session.");
+            },
+            error: function () {
+                console.log("Lỗi khi lưu tổng giá trị vào Session.");
+            }
+        });
+    }
+
+    function addToCart(productId) {
+    // Thêm sản phẩm vào giỏ hàng
+    // ...
+
+    // Lấy giá trị tổng giá trị từ Session và cập nhật giao diện
+    $.ajax({
+        type: "GET",
+        url: '@Url.Action("GetTotalPrice", "Cart")',
+        success: function (data) {
+            $("#totalPrice").text(data.totalPrice.toFixed(2));
+        },
+        error: function () {
+            console.log("Lỗi khi lấy giá trị tổng giá trị từ Session.");
+        }
+    });
+}
+</script>
+
+<script>
+    $(document).on("click", "#checkoutBtn", function (e) {
+        e.preventDefault();
+
+        var emailInput = $("#emailInput");
+        var email = emailInput.val();
+
+        if (email.trim() === "") {
+            alert("Vui lòng nhập địa chỉ email.");
+            emailInput.focus();
+            return;
+        }
+
+        // Tiếp tục logic thanh toán ở đây
+        // ...
+    });
+</script>
+
+
+<script>
+    function processPayment() {
+        // Lấy giá trị địa chỉ email từ ô textbox
+        var email = document.getElementById("emailInput").value;
+
+        // Gửi giá trị địa chỉ email lên máy chủ ASP.NET
+        $.ajax({
+            type: "POST",
+            url: "/SendEmail",
+            data: { email: email },
+            success: function (response) {
+                alert('Email đã được gửi thành công!');
+                showThankYouMessage();
+            },
+            error: function (error) {
+                // Xử lý lỗi (nếu có)
+                console.log(error);
+            }
+        });
+    }
+    function showThankYouMessage() {
+        // Hiển thị thông báo cảm ơn
+        var thankYouMessage = document.createElement('p');
+        thankYouMessage.textContent = 'Cảm ơn bạn đã thanh toán. Email cảm ơn đã được gửi đến địa chỉ email của bạn.';
+        document.body.appendChild(thankYouMessage);
+    }
+</script>
+
+
+
+
+
+
+<section class="section-content padding-y">
+    <div class="container">
+
+        <div class="row">
+            <main class="col-md-9">
+                <div class="card">
+
+                    <table class="table table-borderless table-shopping-cart">
+                        <thead class="text-muted">
+                            <tr class="small text-uppercase">
+                                <th scope="col">Sản phẩm</th>
+                                <th scope="col" width="120">Số lượng</th>
+                                <th scope="col" width="120">Giá</th>
+                                <th scope="col" class="text-right" width="200"> </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null)
+                            {
+                                foreach (var item in Model)
+                                {
+                                    <tr id="product-@item.Product.Id">
+                                        <td>
+                                            <figure class="itemside">
+                                                <div class="aside"><img src="~/Content/images/product/@item.Product.Avatar" class="img-sm"></div>
+                                                <figcaption class="info">
+                                                    <a href="#" class="title text-dark">@item.Product.Name</a>
+
+                                                </figcaption>
+                                            </figure>
+                                        </td>
+                                        <td>
+                                            <div class="quantity-control">
+                                                <button id="decreaseBtn-@item.Product.Id" class="quantity-btn">-</button>
+                                                <input type="number" min="0" value="@item.Quantity" id="ipQuantity-@item.Product.Id" class="quantity-input">
+                                                <button id="increaseBtn-@item.Product.Id" class="quantity-btn">+</button>
+                                            </div>
+
+
+                                        </td>
+                                        <td>
+                                            <div class="price-wrap">
+                                                <var class="price">@item.Product.Price</var>
+
+                                            </div> <!-- price-wrap .// -->
+                                        </td>
+                                        <td class="text-right">
+                                        <td class="text-right">
+                                            <input type="hidden" value="@item.Product.Id" class="productid" />
+                                            <a data-original-title="Save to Wishlist" title="" href="" class="btn btn-light" data-toggle="tooltip"> <i class="fa fa-heart"></i></a>
+                                            <a href="" class="btn btn-light removecart">Xoá</a>
+                                        </td>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <p> Không có sản phẩm trong giỏ hàng</p>
+
+                            }
+
+
+
+
+                        </tbody>
+                    </table>
+
+                    <div class="card-body border-top">
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-light"><i class="fa fa-chevron-left"></i> Tiếp tục mua sắm</a>
+                        <a href="@Url.Action("Index","Payment")" class="btn btn-primary float-md-right"> Thanh toán <i class="fa fa-chevron-right"></i> </a>
+                    </div>
+                </div> <!-- card.// -->
+
+                <div class="alert alert-success mt-3">
+                    <p class="icontext"><i class="icon text-success fa fa-truck"></i> Free Delivery within 1-2 weeks</p>
+                </div>
+
+            </main> <!-- col.// -->
+            <aside class="col-md-3">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <form>
+                            <div class="form-group">
+                                <label>Mã giảm giá?</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="" placeholder="Coupon code">
+                                    <span class="input-group-append">
+                                        <button class="btn btn-primary">Áp dụng</button>
+                                    </span>
+                                </div>
+                            </div>
+                        </form>
+                    </div> <!-- card-body.// -->
+                </div>  <!-- card .// -->
+                <div class="card">
+                    <div class="card-body">
+                        <dl class="dlist-align">
+                            <dt>Thành tiền:</dt>
+                            <dd class="text-right" id="totalPrice"></dd>
+                        </dl>
+
+                        <hr>
+
+
+                    </div> <!-- card-body.// -->
+                </div>  <!-- card .// -->
+            </aside> <!-- col.// -->
+        </div>
+
+    </div> <!-- container .//  -->
+</section>

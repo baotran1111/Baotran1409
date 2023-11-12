@@ -1,0 +1,203 @@
+﻿@model Toranasp.Context.Product
+@{
+    ViewBag.Title = "Detail";
+}
+
+<h2>Detail</h2>
+<br />
+<br />
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $("#addtocart").click(function () {
+            var model = {};
+            //lấy id sản phẩm
+            model.Id = @Model.Id;
+            // lấy số lượng đặt hàng
+            model.Quantity = $("#ipQuantity").val();
+            debugger;
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AddToCart", "Cart")',
+                data:  JSON.stringify(model) ,
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function () {
+                    alert("Thêm vào giỏ hàng thành công!")
+                    $('#CartCount').text(@Session["count"] + 1);
+                },
+                error: function () {
+                    alert("Lỗi khi thêm vào giỏ hàng!");
+                }
+            });
+            return false;
+        });
+    });
+</script>
+
+
+
+
+<section class="py-3 bg-light">
+    <div class="container">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="#">Chi tiết sản phẩm</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
+        </ol>
+    </div>
+</section>
+
+<!-- ========================= SECTION CONTENT ========================= -->
+<section class="section-content bg-white padding-y">
+    <div class="container">
+
+        <!-- ============================ ITEM DETAIL ======================== -->
+        <div class="row">
+            <aside class="col-md-6">
+                <div class="card">
+                    <article class="gallery-wrap">
+                        <div class="img-big-wrap">
+                            <div> <a href="#"><img src="~/Content/images/product/@Model.Avatar"></a></div>
+                        </div> <!-- slider-product.// -->
+                    </article> <!-- gallery-wrap .end// -->
+                </div> <!-- card.// -->
+            </aside>
+            <main class="col-md-6">
+                <article class="product-info-aside">
+
+                    <h2 class="title mt-3">@Model.Name </h2>
+
+                    <div class="rating-wrap my-3">
+                        <ul class="rating-stars">
+                            <li style="width:80%" class="stars-active">
+                                <i class="fa fa-star"></i> <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i> <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                            </li>
+                            <li>
+                                <i class="fa fa-star"></i> <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i> <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                            </li>
+                        </ul>
+
+                    </div> <!-- rating-wrap.// -->
+
+                    <div class="mb-3">
+                        <var class="price h4">@Model.PriceDiscount <sup>đ</sup></var>
+                        <span class="text-muted">@Model.Price <sup>đ</sup></span>
+                    </div> <!-- price-detail-wrap .// -->
+
+                    <p>
+                        @Model.ShortDes
+                    </p>
+
+
+                    <dl class="row">
+                        <dt class="col-sm-3">Thời gian giao hàng</dt>
+                        <dd class="col-sm-9">3-4 ngày</dd>
+                        <dt class="col-sm-9">
+                            7 ngày miễn phí trả hàng
+                        </dt>
+                        <dt class="col-sm-9">
+                            Hàng chính hãng 100%
+                        </dt>
+
+                    </dl>
+
+                    <!-- col.// -->
+                    <!--</div>-->
+
+                    <div class="form-row mt-4">
+                        <div class="form-group col-md flex-grow-0">
+                            <div class="input-group mb-3 input-spinner">
+                                <input type="text" id="ipQuantity" class="form-control" value="1">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-primary" id="increaseBtn" type="button">+</button>
+                                    <button class="btn btn-outline-primary" id="decreaseBtn" type="button">-</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md">
+                            <a href="#" id="addtocart" class="btn btn-primary">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="text">
+                                    Thêm vào giỏ hàng
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+
+
+                </article> <!-- product-info-aside .// -->
+            </main> <!-- col.// -->
+        </div> <!-- row.// -->
+        <!-- ================ ITEM DETAIL END .// ================= -->
+
+
+    </div> <!-- container .//  -->
+</section>
+<!-- ========================= SECTION CONTENT END// ========================= -->
+<!-- ========================= SECTION  ========================= -->
+<section class="section-name padding-y bg">
+    <div class="container">
+
+        <div class="row">
+            <div class="col-md-8">
+                <h5 class="title-description">Mô tả sản phẩm</h5>
+                @Html.Raw(Model.FullDescription)
+            </div> <!-- col.// -->
+
+            <aside class="col-md-4">
+
+                <div class="box">
+                    <h5 class="title-description">Dịch vụ & Khuyến mãi</h5>
+                    <p>
+                        Giá cả hợp lý nhất.<br />
+
+                        Đa dạng về mẫu mã, chủng loại.<br />
+
+                        Giao hàng nhanh chóng, tiện lợi.<br />
+
+                        Nếu sản phẩm hết hàng, Vui lòng liên hệ ngay với chúng tôi.<br />
+                    </p>
+
+                    <h5 class="title-description">Dịch vụ của chúng tôi</h5>
+                    <article class="media mb-3">
+                        @*<a href="#"><img class="img-sm mr-3" src="~/Content/images/posts/3.jpg"></a>*@
+
+                        <div class="media-body">
+                            <h6 class="mt-0"><a href="#">Hình thức vận chuyển</a></h6>
+                            <p class="icontext"><i class="icon text-success fa fa-truck"></i> Giao hàng nhanh trong vòng 1-2 tuần</p>
+
+                        </div>
+                    </article>
+
+                    <article class="media mb-3">
+                        @*<a href="#"><img class="img-sm mr-3" src="~/Content/images/posts/2.jpg"></a>*@
+                        <div class="media-body">
+                            <h6 class="mt-0"><a href="#"></a> Hàng chính hãng</h6>
+                            <p>Cam kết nếu hình không đúng thực tế , bạn nhận ngay coupon mua hàng trị giá 2.000.000đ tại hệ thống siêu thị Big C.</p>
+
+                        </div>
+                    </article>
+                    <article class="media mb-3">
+                        <a href="#"><img class="img-sm mr-3" src="~/Content/images/posts/2.jpg"></a>
+                        <div class="media-body">
+                            <h6 class="mt-0"><a href="#">Thanh toán</a></h6>
+                            <p>Khách hàng có thể lựa chọn một hoặc nhiều hình thức thanh toán.</p>
+
+                        </div>
+                    </article>
+
+
+                </div> <!-- box.// -->
+            </aside> <!-- col.// -->
+        </div> <!-- row.// -->
+
+    </div> <!-- container .//  -->
+</section>
+<!-- ========================= SECTION CONTENT END// ========================= -->

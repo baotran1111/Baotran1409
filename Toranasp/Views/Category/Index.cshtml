@@ -1,0 +1,26 @@
+﻿@model List<Toranasp.Context.Category>
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section class="section-content padding-y">
+    <div class="container">
+        <nav class="row">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-3">
+                    <div class="card ">
+                        <div class="img-wrap" style="background: #ffd7d7">
+                            <a href="#">
+                                <img src="~/Content/images/category/@item.Avatar">
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title"><a href="#">@item.Name</a></h4>
+                        </div>
+                    </div>
+                </div>
+            }
+        </nav>
+    </div>
+</section>
+
